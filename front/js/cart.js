@@ -11,13 +11,6 @@ let fetchSpecificProduct = (productId) => fetch(`http://localhost:3000/api/produ
   return console.log(err);
 });
 
-/**
- * TODO 
- * - Revoir le système d'update et de delete (avec la nouvelle méthode de fetch)
- * !!!ATTENTION!!! : Découpage des fonctions
- * - Enlever tout le code commenté quand tout les changements seront appliqués !!!
- */
-
 let cartStorage = localStorage.getItem("listProducts");
 let cartJson = JSON.parse(cartStorage).sort((a, b) => a.id.localeCompare(b.id));
 let productName;
@@ -28,6 +21,7 @@ const lastName = document.getElementById('lastName');
 const address = document.getElementById('address');
 const email = document.getElementById('email');
 const cityName = document.getElementById('city');
+const arrayOfInputs = [firstName, lastName, address, email, cityName];
 
 async function getImg (cartJson) {
   let productFetched = await fetchSpecificProduct(cartJson.id);
@@ -141,21 +135,23 @@ async function createPaginationCart() {
   }
 }
 
-const deleteProductFromCart = (article) => {
-  cartJson = cartJson.filter(product => !(product.id == article.dataset.id && product.color == article.dataset.color));
-  localStorage.setItem("listProducts", JSON.stringify(cartJson));
-  //Remove the article element from the DOM
-  article.remove();
-  displayTotalQuantity();
-};
-
-const getRelatedArticleForDelete = () => {
+const deleteProductFromCart = () => {
   const deleteButtons = document.querySelectorAll('.deleteItem');
 
   deleteButtons.forEach(btn => 
     btn.addEventListener('click', () => {
       let article = btn.closest('article');
-      deleteProductFromCart(article);
+      cartJson = cartJson.filter(product => !(product.id == article.dataset.id && product.color == article.dataset.color));
+      localStorage.setItem("listProducts", JSON.stringify(cartJson));
+      //Remove the article element from the DOM
+      article.remove();
+
+      // Affiche le nouveau total de la quantitée
+      let totalQuantity = 0;
+      for (let i in cartJson) {
+        totalQuantity += parseInt(cartJson[i].quantity);
+      }
+      document.getElementById('totalQuantity').innerHTML = totalQuantity;
     })
   );
 };
@@ -176,6 +172,7 @@ const editProductQuantity = (input, article) => {
   cartJson.find(product => (product.id == article.dataset.id && product.color == article.dataset.color)).quantity = input.value;
   localStorage.setItem("listProducts", JSON.stringify(cartJson));
 
+  // Affiche le nouveau total de la quantitée
   let totalQuantity = 0;
   for (let i in cartJson) {
     totalQuantity += parseInt(cartJson[i].quantity);
@@ -183,88 +180,66 @@ const editProductQuantity = (input, article) => {
   document.getElementById('totalQuantity').innerHTML = totalQuantity;
 };
 
-/**
- * Validate last name with a Regex
- */
-let validLastName = (inputs) => {
-  const regexLastName = /^(?=.{1,40}$)[a-zA-Z]+(?:[-'\s][a-zA-Z]+)*$/;
-
-  console.log(inputs);
-  inputs.addEventListener('keyup', () => {
-    let isValid = regexLastName.test(inputs.value);
-    if (!isValid) {
-      document.getElementById('lastNameErrorMsg').innerHTML = "Le nom n'est pas valide !";
-    } else {
-      document.getElementById('lastNameErrorMsg').innerHTML = "";
-    }
-  });
-};
-
-/**
- * Validate last name with a Regex
- */
-let validFirstName = (inputs) => {
-  const regexFirstName = /^(?=.{1,40}$)[a-zA-Z]+(?:[-'\s][a-zA-Z]+)*$/;
-
-  console.log(inputs);
-  inputs.addEventListener('keyup', () => {
-    let isValid = regexFirstName.test(inputs.value);
-    if (!isValid) {
-      document.getElementById('firstNameErrorMsg').innerHTML = "Le prénom n'est pas valide !";
-    } else {
-      document.getElementById('firstNameErrorMsg').innerHTML = "";
-    }
-  });
-};
-
-/**
- * Validate address with a Regex
- */
-let validAddress = (inputs) => { //TODO : Finish regex
-  const regexAddress = /^([0-9]*) ?([a-zA-Z,\. ]*) ?([a-zA-Z]*)$/;
-
-  console.log(inputs);
-  inputs.addEventListener('keyup', () => {
-    let isValid = regexAddress.test(inputs.value);
-    if (!isValid) {
-      document.getElementById('addressErrorMsg').innerHTML = "L'adresse n'est pas valide !";
-    } else {
-      document.getElementById('addressErrorMsg').innerHTML = "";
-    }
-  });
-};
-
-/**
- * Validate city name with a Regex
- */
-let validCity = (inputs) => {
-  const regexCity = /^([a-zA-Z\u0080-\u024F]+(?:. |-| |'))*[a-zA-Z\u0080-\u024F]*$/;
-
-  console.log(inputs);
-  inputs.addEventListener('keyup', () => {
-    let isValid = regexCity.test(inputs.value);
-    if (!isValid) {
-      document.getElementById('cityErrorMsg').innerHTML = "Le nom de la ville n'est pas valide !";
-    } else {
-      document.getElementById('cityErrorMsg').innerHTML = "";
-    }
-  });
-};
-
-/**
- * Validate last email with a Regex
- */
-let validEmail = (inputs) => {
+const checkInputs = (inputs) => {
   const regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+  const regexFirstLastName = /^(?=.{1,40}$)[a-zA-Z]+(?:[-'\s][a-zA-Z]+)*$/;
+  const regexAddress = /^([0-9]*) ?([a-zA-Z,\. ]*) ?([a-zA-Z]*)$/; // TODO: Not finished
+  const regexCity = /^([a-zA-Z\u0080-\u024F]+(?:. |-| |'))*[a-zA-Z\u0080-\u024F]*$/; //TODO: Not finished
 
-  console.log(inputs);
-  inputs.addEventListener('keyup', () => {
-    let isValid = regexEmail.test(inputs.value);
-    if (!isValid) {
-      document.getElementById('emailErrorMsg').innerHTML = "L'email n'est pas valide !";
-    } else {
-      document.getElementById('emailErrorMsg').innerHTML = "";
+  let validOrNot = 0;
+
+  for (let i in inputs) {
+
+    if (inputs[i] == firstName) {
+      if (regexFirstLastName.test(inputs[i].value) == false) {
+        validOrNot += 1;
+        firstName.nextElementSibling.innerHTML = "le prénom n'est pas valide";
+      } else {
+        firstName.nextElementSibling.innerHTML = "";
+      }
+    } else if (inputs[i] == lastName) {
+      if (regexFirstLastName.test(inputs[i].value) == false) {
+        validOrNot += 1;
+        lastName.nextElementSibling.innerHTML = "le nom n'est pas valide";
+      } else {
+        lastName.nextElementSibling.innerHTML = "";
+      }
+    } else if (inputs[i] == email) {
+      if (regexEmail.test(inputs[i].value) == false) {
+        validOrNot += 1;
+        email.nextElementSibling.innerHTML = "l'email n'est pas valide";
+      } else {
+        email.nextElementSibling.innerHTML = "";
+      }
+    } else if (inputs[i] == address) {
+      if (regexAddress.test(inputs[i].value) == false) {
+        validOrNot += 1;
+        address.nextElementSibling.innerHTML = "l'adresse n'est pas valide";
+      } else {
+        address.nextElementSibling.innerHTML = "";
+      }
+    } else if (inputs[i] == cityName) {
+      if (regexCity.test(inputs[i].value) == false) {
+        validOrNot += 1;
+        cityName.nextElementSibling.innerHTML = "la ville n'est pas valide";
+      } else {
+        cityName.nextElementSibling.innerHTML = "";
+      }
     }
+  }
+
+  // Si validOrNot > 0 alors au moins un des champs n'est pas valide
+  if (validOrNot == 0) {
+    // TODO: Les inputs sont valides => Constituer l'objet Contact
+  }
+};
+
+// Vérifie si tout les inputs du formulaire sont valide lorsque l'on clique sur le bouton Commander!
+const formValid  = () => {
+  const submitButton = document.getElementById('order');
+
+  submitButton.addEventListener('click', () => {
+    checkInputs(arrayOfInputs);
   });
 };
 
@@ -273,13 +248,9 @@ async function main() {
   await createPaginationCart();
   displayTotalQuantity();
   displayTotalPrice();
-  getRelatedArticleForDelete();
+  deleteProductFromCart();
   getChangeOnProductQuantity();
-  validFirstName(firstName);
-  validLastName(lastName);
-  validEmail(email);
-  validAddress(address);
-  validCity(cityName);
+  formValid();
 }
 
 main();
