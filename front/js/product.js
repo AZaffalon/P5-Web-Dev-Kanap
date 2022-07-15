@@ -111,13 +111,7 @@ const addProducts = (chosenProduct) => {
     }
 
     saveProducts(listProducts);
-
-    // Message pour signifier que le produit a bien été ajouté au panier
-    const addButtonDiv = document.querySelector('.item__content');
-    const addToCartAlert = document.createElement('p');
-    addToCartAlert.innerHTML = "Le produit a été ajouté au panier!";
-    addToCartAlert.style.textAlign = "center";
-    addButtonDiv.appendChild(addToCartAlert);
+    alert("Votre produit a été ajouté au panier !");
   });
 };
 
