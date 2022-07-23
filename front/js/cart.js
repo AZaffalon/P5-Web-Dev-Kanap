@@ -1,27 +1,19 @@
 let fetchSpecificProduct = (productId) => fetch(`http://localhost:3000/api/products/${productId}`)
-.then(function(res) {
-  if (res.ok) {
-    return res.json();
-  }
-})
-.then(function(json) {
-  return json;
-})
-.catch(function(err) {
-  return console.log(err);
-});
+  .then(function(res) {
+    if (res.ok) {
+      return res.json();
+    }
+  })
+  .then(function(json) {
+    return json;
+  })
+  .catch(function(err) {
+    return console.log(err);
+  });
 
 let cartStorage = localStorage.getItem("listProducts");
 let cartJson = JSON.parse(cartStorage).sort((a, b) => a.id.localeCompare(b.id));
 let productName;
-let productPrice;
-let totalNumberOfProducts = 0;
-const firstName = document.getElementById('firstName');
-const lastName = document.getElementById('lastName');
-const address = document.getElementById('address');
-const email = document.getElementById('email');
-const cityName = document.getElementById('city');
-const arrayOfInputs = [firstName, lastName, address, email, cityName];
 
 async function getImg (cartJson) {
   let productFetched = await fetchSpecificProduct(cartJson.id);
@@ -40,6 +32,7 @@ async function getPrice(cartJson) {
 
 let displayTotalQuantity = () => {
   const numberOfProducts = document.getElementById('totalQuantity');
+  let totalNumberOfProducts = 0;
 
   for (let i in cartJson) {
     totalNumberOfProducts += parseInt(cartJson[i].quantity);
@@ -141,17 +134,16 @@ const deleteProductFromCart = () => {
   deleteButtons.forEach(btn => 
     btn.addEventListener('click', () => {
       let article = btn.closest('article');
-      cartJson = cartJson.filter(product => !(product.id == article.dataset.id && product.color == article.dataset.color));
+      cartJson = cartJson.filter(product => !(product.id === article.dataset.id && product.color === article.dataset.color));
       localStorage.setItem("listProducts", JSON.stringify(cartJson));
       //Remove the article element from the DOM
       article.remove();
 
+      // Affiche le nouveau prix total
+      displayTotalPrice();
+
       // Affiche le nouveau total de la quantitée
-      let totalQuantity = 0;
-      for (let i in cartJson) {
-        totalQuantity += parseInt(cartJson[i].quantity);
-      }
-      document.getElementById('totalQuantity').innerHTML = totalQuantity;
+      displayTotalQuantity();
     })
   );
 };
@@ -169,77 +161,89 @@ const getChangeOnProductQuantity = () => {
 };
 
 const editProductQuantity = (input, article) => {
-  cartJson.find(product => (product.id == article.dataset.id && product.color == article.dataset.color)).quantity = input.value;
+  cartJson.find(product => (product.id === article.dataset.id && product.color === article.dataset.color)).quantity = input.value;
   localStorage.setItem("listProducts", JSON.stringify(cartJson));
 
   // Affiche le nouveau total de la quantitée
-  let totalQuantity = 0;
-  for (let i in cartJson) {
-    totalQuantity += parseInt(cartJson[i].quantity);
-  }
-  document.getElementById('totalQuantity').innerHTML = totalQuantity;
+  displayTotalQuantity();
 };
 
-const checkInputs = (inputs) => {
-  const regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-  const regexFirstLastName = /^(?=.{1,40}$)[a-zA-Z]+(?:[-'\s][a-zA-Z]+)*$/;
-  const regexAddress = /^([0-9]*) ?([a-zA-Z,\. ]*) ?([a-zA-Z]*)$/; // TODO: Not finished
-  const regexCity = /^([a-zA-Z\u0080-\u024F]+(?:. |-| |'))*[a-zA-Z\u0080-\u024F]*$/; //TODO: Not finished
 
-  let validOrNot = 0;
+const firstName = document.getElementById('firstName');
+const lastName = document.getElementById('lastName');
+const address = document.getElementById('address');
+const email = document.getElementById('email');
+const cityName = document.getElementById('city');
 
-  for (let i in inputs) {
+const regexEmail = /^[\w\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+const regexFirstLastName = /^(?=.{1,40}$)[a-zA-Z]+(?:[-'\s][a-zA-Z]+)*$/;
+const regexAddress = /^([0-9]*) ?([a-zA-Z,\. ]*) ?([a-zA-Z]*)$/;
+const regexCity = /^[a-zA-Z]([a-z]|[éèàôîù])*([\s-][a-zA-Z]([a-z]|[éèàôîù])*)*$/;
 
-    if (inputs[i] == firstName) {
-      if (regexFirstLastName.test(inputs[i].value) == false) {
-        validOrNot += 1;
-        firstName.nextElementSibling.innerHTML = "le prénom n'est pas valide";
-      } else {
-        firstName.nextElementSibling.innerHTML = "";
-      }
-    } else if (inputs[i] == lastName) {
-      if (regexFirstLastName.test(inputs[i].value) == false) {
-        validOrNot += 1;
-        lastName.nextElementSibling.innerHTML = "le nom n'est pas valide";
-      } else {
-        lastName.nextElementSibling.innerHTML = "";
-      }
-    } else if (inputs[i] == email) {
-      if (regexEmail.test(inputs[i].value) == false) {
-        validOrNot += 1;
-        email.nextElementSibling.innerHTML = "l'email n'est pas valide";
-      } else {
-        email.nextElementSibling.innerHTML = "";
-      }
-    } else if (inputs[i] == address) {
-      if (regexAddress.test(inputs[i].value) == false) {
-        validOrNot += 1;
-        address.nextElementSibling.innerHTML = "l'adresse n'est pas valide";
-      } else {
-        address.nextElementSibling.innerHTML = "";
-      }
-    } else if (inputs[i] == cityName) {
-      if (regexCity.test(inputs[i].value) == false) {
-        validOrNot += 1;
-        cityName.nextElementSibling.innerHTML = "la ville n'est pas valide";
-      } else {
-        cityName.nextElementSibling.innerHTML = "";
-      }
-    }
+const checkInputs = (input, regex, message) => {
+  let isValid = true;
+
+  if (new RegExp(regex).test(input.value) === false) {
+    input.nextElementSibling.innerHTML = message;
+    isValid = false;
+  } else {
+    input.nextElementSibling.innerHTML = '';
   }
-
-  // Si validOrNot > 0 alors au moins un des champs n'est pas valide
-  if (validOrNot == 0) {
-    // TODO: Les inputs sont valides => Constituer l'objet Contact
-  }
+  return isValid;
 };
 
-// Vérifie si tout les inputs du formulaire sont valide lorsque l'on clique sur le bouton Commander!
+// Vérifie si tous les inputs du formulaire sont valides lorsque l'on clique sur le bouton Commander !
 const formValid  = () => {
-  const submitButton = document.getElementById('order');
+  const form = document.getElementsByClassName('cart__order__form')[0];
 
-  submitButton.addEventListener('click', () => {
-    checkInputs(arrayOfInputs);
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    
+    let arr = [];
+
+    arr.push(checkInputs(firstName, regexFirstLastName, message = "le prénom n'est pas valide"));
+
+    arr.push(checkInputs(lastName, regexFirstLastName, message = "le nom n'est pas valide"));
+
+    arr.push(checkInputs(cityName, regexCity, message = "la ville n'est pas valide"));
+
+    arr.push(checkInputs(address, regexAddress, message = "adresse invalide"));
+
+    arr.push(checkInputs(email, regexEmail, message = "Email invalide"));
+
+    // Tout les regex sont true, on peut donc constituer l'objet contact et faire la requête POST 
+    if (arr.filter(a => a === false).length === 0) {
+      console.log('Tout les regex sont bon!');
+
+      let contact = {
+        firstName: firstName.value,
+        lastName: lastName.value,
+        address: address.value,
+        city: cityName.value,
+        email: email.value
+      };
+      console.log(contact);
+
+
+      let productIdFromCart = [];
+      [...document.getElementsByClassName('cart__item')].forEach(item => 
+        productIdFromCart.push(item.dataset.id)
+      );
+      console.log(productIdFromCart);
+
+      let orderId = "ekblk56";
+
+      fetch("http://localhost:3000/api/products/order", {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json', 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(contact, productIdFromCart, orderId)
+      });
+
+      location.href= `./confirmation.html?${orderId}`;
+    }
   });
 };
 
@@ -247,7 +251,7 @@ async function main() {
 
   await createPaginationCart();
   displayTotalQuantity();
-  displayTotalPrice();
+  await displayTotalPrice();
   deleteProductFromCart();
   getChangeOnProductQuantity();
   formValid();
