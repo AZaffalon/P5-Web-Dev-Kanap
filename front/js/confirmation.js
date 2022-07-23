@@ -1,5 +1,8 @@
-const str = window.location.href;
-const url = new URL(str);
-const urlOrderId = url.search;
+const searchParams = new URLSearchParams(window.location.search);
+const orderId = searchParams.get('orderId');
 
-document.getElementById('orderId').innerHTML = urlOrderId.substring(1);
+if(orderId) {
+  document.getElementById('orderId').innerHTML = orderId;
+} else {
+  window.location.href = './index.html';
+}
