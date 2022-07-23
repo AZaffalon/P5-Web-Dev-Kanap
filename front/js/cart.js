@@ -12,7 +12,13 @@ let fetchSpecificProduct = (productId) => fetch(`http://localhost:3000/api/produ
   });
 
 let cartStorage = localStorage.getItem("listProducts");
-let cartJson = JSON.parse(cartStorage).sort((a, b) => a.id.localeCompare(b.id));
+let cartJson;
+if (cartStorage == '[]') {
+  document.getElementsByClassName('cart')[0].remove();
+  document.getElementById('cartAndFormContainer').firstElementChild.innerHTML = "Votre panier est vide";
+} else {
+  cartJson = JSON.parse(cartStorage).sort((a, b) => a.id.localeCompare(b.id));
+}
 let productName;
 
 async function getImg (cartJson) {
@@ -180,8 +186,8 @@ const regexFirstLastName = /^(?=.{1,40}$)[a-zA-Z]+(?:[-'\s][a-zA-Z]+)*$/;
 const regexAddress = /^([0-9]*) ?([a-zA-Z,\. ]*) ?([a-zA-Z]*)$/;
 const regexCity = /^[a-zA-Z]([a-z]|[éèàôîù])*([\s-][a-zA-Z]([a-z]|[éèàôîù])*)*$/;
 
+let isValid = true;
 const checkInputs = (input, regex, message) => {
-  let isValid = true;
 
   if (new RegExp(regex).test(input.value) === false) {
     input.nextElementSibling.innerHTML = message;
@@ -189,7 +195,6 @@ const checkInputs = (input, regex, message) => {
   } else {
     input.nextElementSibling.innerHTML = '';
   }
-  return isValid;
 };
 
 // Vérifie si tous les inputs du formulaire sont valides lorsque l'on clique sur le bouton Commander !
@@ -198,21 +203,19 @@ const formValid  = () => {
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    
-    let arr = [];
 
-    arr.push(checkInputs(firstName, regexFirstLastName, message = "le prénom n'est pas valide"));
+    checkInputs(firstName, regexFirstLastName, "le prénom n'est pas valide");
 
-    arr.push(checkInputs(lastName, regexFirstLastName, message = "le nom n'est pas valide"));
+    checkInputs(lastName, regexFirstLastName, "le nom n'est pas valide");
 
-    arr.push(checkInputs(cityName, regexCity, message = "la ville n'est pas valide"));
+    checkInputs(cityName, regexCity, "la ville n'est pas valide");
 
-    arr.push(checkInputs(address, regexAddress, message = "adresse invalide"));
+    checkInputs(address, regexAddress, "adresse invalide");
 
-    arr.push(checkInputs(email, regexEmail, message = "Email invalide"));
+    checkInputs(email, regexEmail, "Email invalide");
 
     // Tout les regex sont true, on peut donc constituer l'objet contact et faire la requête POST 
-    if (arr.filter(a => a === false).length === 0) {
+    if (isValid) {
       console.log('Tout les regex sont bon!');
 
       let contact = {
@@ -225,13 +228,11 @@ const formValid  = () => {
       console.log(contact);
 
 
-      let productIdFromCart = [];
-      [...document.getElementsByClassName('cart__item')].forEach(item => 
-        productIdFromCart.push(item.dataset.id)
-      );
-      console.log(productIdFromCart);
+      let products = cartJson.map((item) => item.id);
 
-      let orderId = "ekblk56";
+      console.log(products);
+
+      let datas = { contact, products};
 
       fetch("http://localhost:3000/api/products/order", {
         method: "POST",
@@ -239,10 +240,20 @@ const formValid  = () => {
           'Accept': 'application/json', 
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(contact, productIdFromCart, orderId)
-      });
-
-      location.href= `./confirmation.html?${orderId}`;
+        body: JSON.stringify(datas)
+      })
+        .then(function(res) {
+          if (res.ok) {
+            return res.json();
+          }
+        })
+        .then(function(data) {
+          localStorage.clear();
+          location.href= `./confirmation.html?orderId=${data.orderId}`;
+        })
+        .catch(function(err) {
+          return console.log(err);
+        });
     }
   });
 };
