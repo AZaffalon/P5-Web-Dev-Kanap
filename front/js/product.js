@@ -19,11 +19,10 @@ const retrieveOneProduct = () => fetch(`http://localhost:3000/api/products/${url
     return res.json();
   })
   .then(function(json) {
-    // console.log(json);
     return json;
   })
   .catch(function(err) {
-    // TODO: Retourner message d'erreur
+    console.log(err);
   });
 
 /**

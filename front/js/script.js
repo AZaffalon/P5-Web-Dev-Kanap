@@ -12,7 +12,7 @@ const retrieveProductsData = () => fetch('http://localhost:3000/api/products')
     return json;
   })
   .catch(function(err) {
-    // TODO: Retourner message d'erreur
+    document.getElementsByClassName('titles')[0].nextElementSibling.innerHTML =  err;
   });
 
 
