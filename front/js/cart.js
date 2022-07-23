@@ -13,6 +13,8 @@ let fetchSpecificProduct = (productId) => fetch(`http://localhost:3000/api/produ
 
 let cartStorage = localStorage.getItem("listProducts");
 let cartJson;
+
+// TODO: Error in console
 if (cartStorage == '[]') {
   document.getElementsByClassName('cart')[0].remove();
   document.getElementById('cartAndFormContainer').firstElementChild.innerHTML = "Votre panier est vide";
