@@ -105,12 +105,19 @@ const addProducts = (chosenProduct) => {
 
     if (productExist) {
       productExist.quantity += parseInt(selectQuantity.value);
+      alert("Votre produit a été ajouté au panier !");
     } else {
-      listProducts.push({id: chosenProduct._id, color: selectColor.value, quantity: parseInt(selectQuantity.value)});
+      if ((selectColor.value == "") || (parseInt(selectQuantity.value) == 0)){
+        alert("Votre produit n'a pas été ajouté au panier ! Vous n'avez pas remplis toutes les informations nécessaires !");    
+      } else if(parseInt(selectQuantity.value) > 100) {
+        alert("Vous ne pouvez pas choisir une quantitée supérieur à 100");
+      } else {
+        listProducts.push({id: chosenProduct._id, color: selectColor.value, quantity: parseInt(selectQuantity.value)});
+        alert("Votre produit a été ajouté au panier !");
+      }
     }
 
     saveProducts(listProducts);
-    alert("Votre produit a été ajouté au panier !");
   });
 };
 

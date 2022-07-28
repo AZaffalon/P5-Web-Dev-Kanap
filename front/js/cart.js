@@ -14,7 +14,7 @@ let fetchSpecificProduct = (productId) => fetch(`http://localhost:3000/api/produ
 let cartStorage = localStorage.getItem("listProducts");
 let cartJson = {};
 
-if (cartStorage == null) {
+if (cartStorage == null || cartStorage == '[]') {
   document.getElementsByClassName('cart')[0].remove();
   document.getElementById('cartAndFormContainer').firstElementChild.innerHTML = "Votre panier est vide";
 } else {
