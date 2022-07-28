@@ -12,10 +12,9 @@ let fetchSpecificProduct = (productId) => fetch(`http://localhost:3000/api/produ
   });
 
 let cartStorage = localStorage.getItem("listProducts");
-let cartJson;
+let cartJson = {};
 
-// TODO: Error in console
-if (cartStorage == '[]') {
+if (cartStorage == null) {
   document.getElementsByClassName('cart')[0].remove();
   document.getElementById('cartAndFormContainer').firstElementChild.innerHTML = "Votre panier est vide";
 } else {
@@ -45,7 +44,9 @@ let displayTotalQuantity = () => {
   for (let i in cartJson) {
     totalNumberOfProducts += parseInt(cartJson[i].quantity);
   }
-  numberOfProducts.innerHTML = totalNumberOfProducts;
+  if (numberOfProducts) {
+    numberOfProducts.innerHTML = totalNumberOfProducts;
+  }
 };
 
 async function displayTotalPrice() {
@@ -56,8 +57,9 @@ async function displayTotalPrice() {
     const priceByQuantity = await getPrice(cartJson[i]) * cartJson[i].quantity;
     total += priceByQuantity;
   }
-
-  totalPrice.innerHTML = total;
+  if (totalPrice) {
+    totalPrice.innerHTML = total;
+  }
 }
 
 async function createPaginationCart() {
@@ -202,62 +204,63 @@ const checkInputs = (input, regex, message) => {
 // Vérifie si tous les inputs du formulaire sont valides lorsque l'on clique sur le bouton Commander !
 const formValid  = () => {
   const form = document.getElementsByClassName('cart__order__form')[0];
-
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    checkInputs(firstName, regexFirstLastName, "le prénom n'est pas valide");
-
-    checkInputs(lastName, regexFirstLastName, "le nom n'est pas valide");
-
-    checkInputs(cityName, regexCity, "la ville n'est pas valide");
-
-    checkInputs(address, regexAddress, "adresse invalide");
-
-    checkInputs(email, regexEmail, "Email invalide");
-
-    // Tout les regex sont true, on peut donc constituer l'objet contact et faire la requête POST 
-    if (isValid) {
-      console.log('Tout les regex sont bon!');
-
-      let contact = {
-        firstName: firstName.value,
-        lastName: lastName.value,
-        address: address.value,
-        city: cityName.value,
-        email: email.value
-      };
-      console.log(contact);
-
-
-      let products = cartJson.map((item) => item.id);
-
-      console.log(products);
-
-      let datas = { contact, products};
-
-      fetch("http://localhost:3000/api/products/order", {
-        method: "POST",
-        headers: {
-          'Accept': 'application/json', 
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(datas)
-      })
-        .then(function(res) {
-          if (res.ok) {
-            return res.json();
-          }
+  if (form) {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+  
+      checkInputs(firstName, regexFirstLastName, "le prénom n'est pas valide");
+  
+      checkInputs(lastName, regexFirstLastName, "le nom n'est pas valide");
+  
+      checkInputs(cityName, regexCity, "la ville n'est pas valide");
+  
+      checkInputs(address, regexAddress, "adresse invalide");
+  
+      checkInputs(email, regexEmail, "Email invalide");
+  
+      // Tout les regex sont true, on peut donc constituer l'objet contact et faire la requête POST 
+      if (isValid) {
+        console.log('Tout les regex sont bon!');
+  
+        let contact = {
+          firstName: firstName.value,
+          lastName: lastName.value,
+          address: address.value,
+          city: cityName.value,
+          email: email.value
+        };
+        console.log(contact);
+  
+  
+        let products = cartJson.map((item) => item.id);
+  
+        console.log(products);
+  
+        let datas = { contact, products};
+  
+        fetch("http://localhost:3000/api/products/order", {
+          method: "POST",
+          headers: {
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(datas)
         })
-        .then(function(data) {
-          localStorage.clear();
-          location.href= `./confirmation.html?orderId=${data.orderId}`;
-        })
-        .catch(function(err) {
-          return console.log(err);
-        });
-    }
-  });
+          .then(function(res) {
+            if (res.ok) {
+              return res.json();
+            }
+          })
+          .then(function(data) {
+            localStorage.clear();
+            location.href= `./confirmation.html?orderId=${data.orderId}`;
+          })
+          .catch(function(err) {
+            return console.log(err);
+          });
+      }
+    });
+  }
 };
 
 async function main() {
