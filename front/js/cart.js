@@ -14,13 +14,21 @@ let fetchSpecificProduct = (productId) => fetch(`http://localhost:3000/api/produ
 let cartStorage = localStorage.getItem("listProducts");
 let cartJson = {};
 
-if (cartStorage == null || cartStorage == '[]') {
+const displayEmptyCart = () => {
   document.getElementsByClassName('cart')[0].remove();
   document.getElementById('cartAndFormContainer').firstElementChild.innerHTML = "Votre panier est vide";
+  const redirectLink = document.getElementById('cartAndFormContainer').appendChild(document.createElement('a'));
+  redirectLink.innerHTML = "Cliquer ici pour voir notre sélection de produits !";
+  redirectLink.href = "./index.html";
+  redirectLink.style = "display: flex; justify-content: center";
+  redirectLink.style.color = "#fff";
+};
+
+if (cartStorage == null || cartStorage == '[]') {
+  displayEmptyCart();
 } else {
   cartJson = JSON.parse(cartStorage).sort((a, b) => a.id.localeCompare(b.id));
 }
-let productName;
 
 async function getImg (cartJson) {
   let productFetched = await fetchSpecificProduct(cartJson.id);
@@ -149,11 +157,15 @@ const deleteProductFromCart = () => {
       //Remove the article element from the DOM
       article.remove();
 
-      // Affiche le nouveau prix total
-      displayTotalPrice();
+      if (cartJson.length == 0) {
+        displayEmptyCart();
+      } else {    
+        // Affiche le nouveau prix total
+        displayTotalPrice();
 
-      // Affiche le nouveau total de la quantitée
-      displayTotalQuantity();
+        // Affiche le nouveau total de la quantitée
+        displayTotalQuantity();
+      }
     })
   );
 };
