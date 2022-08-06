@@ -13,7 +13,7 @@ let fetchSpecificProduct = (productId) => fetch(`http://localhost:3000/api/produ
 
 let cartStorage = localStorage.getItem("listProducts");
 let cartJson = {};
-
+// Front for cart page if cart is empty
 const displayEmptyCart = () => {
   document.getElementsByClassName('cart')[0].remove();
   document.getElementById('cartAndFormContainer').firstElementChild.innerHTML = "Votre panier est vide";
@@ -146,6 +146,7 @@ async function createPaginationCart() {
   }
 }
 
+// Remove product from cart
 const deleteProductFromCart = () => {
   const deleteButtons = document.querySelectorAll('.deleteItem');
 
@@ -160,16 +161,17 @@ const deleteProductFromCart = () => {
       if (cartJson.length == 0) {
         displayEmptyCart();
       } else {    
-        // Affiche le nouveau prix total
+        // Display new total price
         displayTotalPrice();
 
-        // Affiche le nouveau total de la quantitée
+        // Display new quantity total
         displayTotalQuantity();
       }
     })
   );
 };
 
+// Check changes on each product and apply it
 const getChangeOnProductQuantity = () => {
   const quantityInputs = document.querySelectorAll('.itemQuantity');
 
@@ -182,11 +184,12 @@ const getChangeOnProductQuantity = () => {
   );
 };
 
+//Change the new price/quantity of the product 
 const editProductQuantity = (input, article) => {
   cartJson.find(product => (product.id === article.dataset.id && product.color === article.dataset.color)).quantity = input.value;
   localStorage.setItem("listProducts", JSON.stringify(cartJson));
 
-  // Affiche le nouveau total de la quantitée
+  // Display new quantity totals
   displayTotalQuantity();
 };
 
@@ -203,6 +206,7 @@ const regexAddress = /^([0-9]*) ?([a-zA-Z,\. ]*) ?([a-zA-Z]*)$/;
 const regexCity = /^[a-zA-Z]([a-z]|[éèàôîù])*([\s-][a-zA-Z]([a-z]|[éèàôîù])*)*$/;
 
 let isValid = true;
+// check one particular input in form
 const checkInputs = (input, regex, message) => {
 
   if (new RegExp(regex).test(input.value) === false) {
@@ -213,7 +217,7 @@ const checkInputs = (input, regex, message) => {
   }
 };
 
-// Vérifie si tous les inputs du formulaire sont valides lorsque l'on clique sur le bouton Commander !
+// Check if all inputs are valid when clicking on 'Commander !'
 const formValid  = () => {
   const form = document.getElementsByClassName('cart__order__form')[0];
   if (form) {
@@ -230,7 +234,7 @@ const formValid  = () => {
   
       checkInputs(email, regexEmail, "Email invalide");
   
-      // Tout les regex sont true, on peut donc constituer l'objet contact et faire la requête POST 
+      // All regex ar valid
       if (isValid) {
         console.log('Tout les regex sont bon!');
   
