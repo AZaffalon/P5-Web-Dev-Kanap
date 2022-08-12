@@ -107,14 +107,19 @@ const addProducts = (chosenProduct) => {
       // Check if there is a color and a quantity
       if ((selectColor.value == "") || (parseInt(selectQuantity.value) == 0)){
         alert("Votre produit n'a pas été ajouté au panier ! Vous n'avez pas remplis toutes les informations nécessaires !");    
+      } else if ((productExist.quantity + parseInt(selectQuantity.value)) > 100) {
+        console.log(productExist.quantity + parseInt(selectQuantity.value));
+        alert("Vous ne pouvez pas mettre plus de 100 articles");
       } else {
         productExist.quantity += parseInt(selectQuantity.value);
         alert("Votre produit a été ajouté au panier !");
       }
     } else {
       // Check if there is a color and a quantity
-      if ((selectColor.value == "") || (parseInt(selectQuantity.value) == 0)){
+      if (selectColor.value == ""){
         alert("Votre produit n'a pas été ajouté au panier ! Vous n'avez pas remplis toutes les informations nécessaires !");    
+      } else if ((parseInt(selectQuantity.value) > 100 ) || (parseInt(selectQuantity.value) == 0)) {
+        alert("Vous ne pouvez pas choisir cette quantitée");
       } else {
         listProducts.push({id: chosenProduct._id, color: selectColor.value, quantity: parseInt(selectQuantity.value)});
         alert("Votre produit a été ajouté au panier !");
