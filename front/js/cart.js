@@ -175,11 +175,19 @@ const deleteProductFromCart = () => {
 const getChangeOnProductQuantity = () => {
   const quantityInputs = document.querySelectorAll('.itemQuantity');
 
-  quantityInputs.forEach(input => 
+  quantityInputs.forEach(input =>
     input.addEventListener('change', () => {
       let article = input.closest('article');
-      editProductQuantity(input, article);
-      displayTotalPrice();
+
+      if (input.value > 100) {
+        alert("La limite par produit est de 100");
+        input.value = 100;
+        editProductQuantity(input, article);
+        displayTotalPrice();
+      } else {
+        editProductQuantity(input, article);
+        displayTotalPrice();
+      }
     })
   );
 };
